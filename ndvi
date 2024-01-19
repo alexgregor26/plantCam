@@ -1,0 +1,119 @@
+import cv2
+import numpy as np
+
+img = cv2.imread("brasiln.jpg", cv2.IMREAD_COLOR)
+img1 = np.array(img, dtype=float)/float(255)
+#plnt = img[1:1000 ,900:1520]
+plnt = img1
+
+plntf = cv2.imread("brasilb.jpg", cv2.IMREAD_COLOR)
+plntf = np.array(plntf, dtype=float)/float(255)
+
+def display(image): #define a display method
+    shape = image.shape
+    height = int(shape[0] / 2)
+    width = int(shape[1] / 2)
+    image = cv2.resize(image, (width, height))
+    cv2.namedWindow('Plant')
+    cv2.imshow('Plant', image)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()  
+
+def contrast_stretch(im):
+    in_min = np.percentile(im, 5) #5% darkest pixels
+    print(in_min)
+    in_max = np.percentile(im, 95) #5% brightest pixels
+    print(in_max)
+    
+    #    new = np.array([])
+    #    for x in im:
+    #        if (im[x] > in_min):
+    #            new[x] = 0
+    #        else:
+    #            new[x] = im[x]
+    #    display(new)
+
+    out_min = 0.0
+    out_max = 1.0
+
+    out = im - in_min
+    out *= ((out_min - out_max) / (in_min - in_max))
+    out += in_min
+
+    return out
+
+def contrast2(im):
+    alpha = 1.2
+    beta = 9
+    out = ((im*alpha))
+    return out
+
+def takered(im):
+    b, g, r = cv2.split(im)
+    red = r.astype(float)
+    return red
+
+def takeblue(im):
+    b, g, r = cv2.split(im)
+    blue = b
+    return blue
+
+def takegreen(im):
+    b, g, r = cv2.split(im)
+    green = g
+    return green
+
+def vibottom(im):
+    b, g, r = cv2.split(im)
+    blue = (b.astype(float) - (2*r.astype(float)))
+    print(blue)
+    bottom = (r.astype(float) + b.astype(float))
+    return bottom
+
+def vitop(im):
+    b, g, r = cv2.split(im)
+    blue = (b.astype(float) - (2*r.astype(float)))
+    top = (r.astype(float) - b.astype(float))
+    return top
+
+def calc_ndvi(im):
+    ndvi = (vitop(im)/vibottom(im))
+    return ndvi
+
+def wheel_ndvi(im, imf):
+    b, g, r = cv2.split(im)
+    blue = (b.astype(float))
+    c, y, m = cv2.split(imf)
+    ir = (m.astype(float))
+    ndvi = ((ir - blue) / (ir + blue)) 
+    return ndvi
+
+
+display(wheel_ndvi(plnt, plntf))
+
+display(plnt)
+print(plntf)
+display(plntf)
+#display(plnt)
+
+print("------------")
+
+#print(contrast2(plntf))
+#display(contrast2(plntf))
+
+contrast = contrast_stretch(plntf)
+display(contrast)
+
+ndvi = calc_ndvi(plntf)
+#display(vibottom(plntf))
+#display(vitop(plntf))
+display(ndvi)
+print(ndvi)
+display(contrast_stretch(ndvi))
+
+#display(takered(plnt))
+display(takered(plntf))
+#display(takeblue(plnt))
+display(takeblue(plntf)) 
+#display(takegreen(plnt))
+#display(takegreen(plntf)) 
